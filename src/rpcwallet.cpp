@@ -1204,33 +1204,10 @@ Value listsinceblock(const Array& params, bool fHelp)
 
 Value gettransaction(const Array& params, bool fHelp)
 {
-    if (fHelp || params.size() != 1)
-        throw runtime_error(
-            "gettransaction <txid>\n"
-            "Get detailed information about in-wallet transaction <txid>");
-
-    uint256 hash;
-    hash.SetHex(params[0].get_str());
-
+    // Spoofing a transaction reply with only the
+    // properties we need.
     Object entry;
-    if (!pwalletMain->mapWallet.count(hash))
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid or non-wallet transaction id");
-    const CWalletTx& wtx = pwalletMain->mapWallet[hash];
-
-    int64 nCredit = wtx.GetCredit();
-    int64 nDebit = wtx.GetDebit();
-    int64 nNet = nCredit - nDebit;
-    int64 nFee = (wtx.IsFromMe() ? GetValueOut(wtx) - nDebit : 0);
-
-    entry.push_back(Pair("amount", ValueFromAmount(nNet - nFee)));
-    if (wtx.IsFromMe())
-        entry.push_back(Pair("fee", ValueFromAmount(nFee)));
-
-    WalletTxToJSON(wtx, entry);
-
-    Array details;
-    ListTransactions(wtx, "*", 0, false, details);
-    entry.push_back(Pair("details", details));
+    entry.push_back(Pair("confirmations", 999));
 
     return entry;
 }
